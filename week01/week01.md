@@ -95,14 +95,6 @@ function foo() {
     return "Hello World!"
 }
 
-// anonymous function 1: a.k.a. arrow function
-const foo_anon1 = () => "Hello World!" // no braces will return value
-
-// anonymous function 2
-const foo_anon2 = function() {
-    return "Hello World!"
-}
-
 // NOTE: recursion exists in functions
 
 // array
@@ -121,11 +113,147 @@ console.log(obj.attribute)
 console.log(obj['attribute2'])
 ```
 
-balls
+There are also features of JS that allow for functional programming to happen.
 
+1. Anonymous functions: functions that do not need to be defined with a name
+2. Functions as objects: variables can contain functions
+3.  Higher - order functions - functions can be passed into other functions as arguments + functions can be returned by other functions
+
+```javascript
+const anon1 = () => "Hello World!"
+
+const anon2 = function() {
+	return "Hello World!"
+}
+
+function higherOrder1() {
+	return (name) => "Hello, " + name
+}
+
+function higherOrder2(f, number) {
+	return f(number)
+}
+```
+
+---
 ## Functional Programming in JavaScript
 
 oh boy
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEwNzc3MDMxMF19
--->
+
+
+## Cons List
+
+We can model a linked list only using functions to capture data.
+
+The following parts require prior understanding on anonymous functions.
+
+```javascript
+(x) => x + 1 // anonymous function
+
+// calling an anonymous function with a parameter
+((x) => x + 1)(2) // 3
+```
+
+---
+
+Consider the function below.
+
+```javascript
+function cons(head, rest = null) {
+	return (selector) => selector(head, rest)
+}
+```
+
+The above function `cons` returns an anonymous function, `(selector) => selector(head, rest)`
+which takes in a function `selector` as parameter and calls `selector` with the parameters `head` and `rest`.
+
+`head` refers to the current node in the linked list, and `rest` refers to the rest of the linked list.
+
+We can define a cons list as follows:
+
+```javascript
+let list = cons(1, cons(2, cons(3, null)))
+```
+
+ Note that it is equivalent to the following chain of anonymous functions (by expanding `cons`):
+
+```javascript
+let list = (s1) => s1(1, (s2) => s2(2, (s3) => s3(3, null)))
+```
+
+We now define two `selector` functions for our linked list, to obtain either the `head` or the `rest` of the linked list:
+
+```javascript
+function s_head(list) {
+	return list((head, _) => head)
+}
+
+function s_rest(list) {
+	return list((_, rest) => rest)
+}
+```
+
+It is now possible to access certain elements from our linked list:
+
+```javascript
+let list = cons(1, null)
+
+// we will simplify the above to see how the head is obtained
+s_head(list) // 1
+
+// ---- the above is equivalent to all the below ----
+list((head, _) => head)
+cons(1, null)((head, _) => head)
+
+// we can see that we are calling the anonymous function with the head selector, (head, _) => head
+((s1) => s1(1, null))((head, _) => head)
+
+// we continue simplifying...
+((head, _) => head) => s1(1, null)
+((head, _) => head))(1, null)
+
+1 // head
+```
+
+The above code looks really confusing, so we will try to simplify it by substituting all anonymous functions with named functions instead:
+
+```javascript
+// we omit the cons because it is not that relevant in this case
+
+function cons(head, rest) {
+
+	function run_selector(selector) {
+		return selector(head, rest)
+	}
+
+	return run_selector
+}
+
+let list = cons(1, null)
+
+// equivalent to s_head
+function s_head(list) {
+
+	// equivalent to (head, _) => head
+	function get_head(head, rest) {
+		return head
+	}
+
+	return list(get_head)
+}
+
+s_head(list)
+
+// ---- the above is equivalent to all the below, we continue simplifying ----
+list(get_head)
+run_selector(get_head)
+get_head(1, null)
+1 // head
+```
+
+From the above, it is understood that the process of trying to get the `head` / `rest` of a cons list is as follows:
+
+1. We call `head` / `rest` on our cons list
+2. our cons list calls a selector function to extract the `head` / `rest`
+3.  the selector function runs with the two arguments from the cons list and returns `head` or `rest` respectively.
+
