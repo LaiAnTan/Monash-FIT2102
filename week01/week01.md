@@ -135,12 +135,58 @@ function higherOrder2(f, number) {
 }
 ```
 
+The methods of the `Array` class in JavaScript are also higher-order functions that make manipulating elements in an array easy.
+
+`map`, `filter` and `reduce` are particularly useful.
+
+```javascript
+let arr = [1, 2, 3]
+
+arr.map((x) => x * 2) // [2, 4, 6]
+arr.filter(x => x % 2 !== 0) // [1, 3]
+arr.reduce((ac, x) => ac + x, 0) // 6
+```
+
 ---
-## Functional Programming in JavaScript
+## Introduction to Functional Programming
 
-oh boy
+### Side Effects, Purity, Referential Transparency
 
+A *side effect* of a function is when the function changes some state outside of its scope.
+- changing a value outside the function scope
+- printing to output
+- etc
 
+A function is considered *pure* if it:
+- has no side effects
+- always produces the same result for some input
+
+In the context of FP, we do not think of a variable as a 'container' that stores a value, rather just an alias for the value. Following this, *all variables in functional programming are immutable*.
+
+There is also *referential transparency*, which means that we can *substitute an expression that evaluates to some value, with that value, without affecting the output of the program*. Usually, this means that we can substitute the function for its output, in functional programming.
+
+For example, an impure function:
+
+```javascript
+let global_counter = 0
+
+const impureFunc = () => {
+	global_counter++
+}
+```
+
+Demonstrating referential transparency:
+
+```javascript
+const square = (x) => x*x
+
+square(square(2))
+// it is possible to substitute square(2) since it is pure
+square(4)
+8
+```
+
+---
 ## Cons List
 
 We can model a linked list only using functions to capture data.
